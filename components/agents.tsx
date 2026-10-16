@@ -1,0 +1,52 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowUpRight, Bot, Check, Clock3, FileSearch, Globe2, Pause, PenLine, Play, Radio, Search } from 'lucide-react';
+import { useDemo } from '@/lib/store';
+import type { AgentId } from '@/lib/types';
+import { formatDate } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { EmptyState, PageHeading } from '@/components/shared';
+import './supporting.css';
+
+export function Agents() {
+  const { state, dispatch, notify } = useDemo();
+  const locale = state.locale;
+  const t = (en: string, ar: string) => locale === 'ar' ? ar : en;
+  const params = useSearchParams();
+  const router = useRouter();
+  const filter = params.get('status') || 'all';
+  const setFilter = (value: string) => router.replace(value === 'all' ? '/agents' : `/agents?status=${encodeURIComponent(value)}`, { scroll: false });
+  const [researchShown, setResearchShown] = useState(false);
+  const [coverageShown, setCoverageShown] = useState(false);
+  const info = {
+    writer: { name: t('Writer', 'الكاتب'), label: t('THE WORDSMITH', 'صانع الكلمات'), icon: PenLine, description: t('Find the right words. Refine your press release with focused, paragraph-level suggestions.', 'اعثر على الكلمات المناسبة. حسّن بيانك الصحفي باقتراحات مركّزة لكل فقرة.'), capabilities: [t('Concise, formal & simple rewrites', 'صياغات موجزة ورسمية ومبسّطة'), t('Explicit approval before any change', 'موافقة صريحة قبل أي تغيير')], pause: t('Paused: simulated rewrites are disabled in the review workspace. You can still edit manually.', 'متوقف: اقتراحات الصياغة بالمحاكاة معطّلة في مساحة المراجعة. يمكنك الاستمرار بالتحرير اليدوي.') },
+    researcher: { name: t('Media researcher', 'الباحث الإعلامي'), label: t('THE CONNECTION FINDER', 'مكتشف العلاقات'), icon: FileSearch, description: t('Explore a fictional media shortlist and see how a focused research handoff could work.', 'استكشف قائمة إعلامية خيالية لترى كيف يمكن تسليم نتائج بحث مركّزة.'), capabilities: [t('Curated fictional outlet profiles', 'ملفات تعريف إعلامية خيالية'), t('Clear relevance notes', 'ملاحظات واضحة حول الصلة')], pause: t('Paused: resume this agent to run the sample media research.', 'متوقف: استأنف هذا الوكيل لتشغيل نموذج البحث الإعلامي.') },
+    monitor: { name: t('Coverage monitor', 'راصد التغطية'), label: t('THE LISTENER', 'المستمع'), icon: Radio, description: t('Bring the conversation into view with a simulated scan of your sample media coverage.', 'تابع النقاش من خلال مسح بالمحاكاة لنماذج التغطية الإعلامية.'), capabilities: [t('Sample coverage & sentiment summary', 'ملخص لتغطية نموذجية وانطباعاتها'), t('Browse and export your findings', 'تصفّح النتائج وصدّرها')], pause: t('Paused: resume this agent to scan the sample coverage. Existing coverage remains available.', 'متوقف: استأنف هذا الوكيل لمسح التغطية النموذجية. تبقى التغطية السابقة متاحة.') },
+  };
+  const agents = state.agents.filter(agent => filter === 'all' || (filter === 'active' ? agent.active : !agent.active));
+  const reviewCampaign = state.campaigns.find(campaign => campaign.status !== 'approved') || state.campaigns[0];
+
+  function run(id: AgentId) {
+    if (!state.agents.find(agent => agent.id === id)?.active) return;
+    dispatch({ type: 'run-agent', id, at: new Date().toISOString() });
+    if (id === 'researcher') setResearchShown(true);
+    if (id === 'monitor') setCoverageShown(true);
+    notify(t('Simulated sample run complete.', 'اكتمل تشغيل النموذج بالمحاكاة.'));
+  }
+
+  return <>
+    <PageHeading eyebrow={t('A HELPING HAND, ON YOUR TERMS', 'مساعدة وفق شروطك')} title={t('Meet your agents', 'تعرّف على وكلائك')} description={t('Three focused assistants. You’re always the editor in charge.', 'ثلاثة مساعدين متخصصين. وأنت دائمًا صاحب القرار التحريري.')} />
+    <div className="support-agents-toolbar"><p><span className="support-live-dot" />{t('Simulated workspace', 'مساحة عمل بالمحاكاة')}<span className="support-toolbar-separator" aria-hidden="true">/</span><span className="muted">{t('No live AI or external services', 'بدون ذكاء اصطناعي مباشر أو خدمات خارجية')}</span></p><label><span className="sr-only">{t('Agent status', 'حالة الوكيل')}</span><select className="select" value={filter} onChange={event => setFilter(event.target.value)}><option value="all">{t('All agents', 'كل الوكلاء')}</option><option value="active">{t('Active agents', 'الوكلاء النشطون')}</option><option value="paused">{t('Paused agents', 'الوكلاء المتوقفون')}</option></select></label></div>
+    <div className="agent-grid support-agent-grid">{agents.map(agent => {
+      const content = info[agent.id];
+      return <article className="agent-card support-agent-card" key={agent.id}><div className="support-agent-card-top"><span className={`support-agent-icon support-agent-icon-${agent.id}`}><content.icon size={23} aria-hidden="true" /></span><span className={`support-status-pill ${agent.active ? 'is-active' : ''}`}><span />{agent.active ? t('Active', 'نشط') : t('Paused', 'متوقف')}</span></div><p className="support-eyebrow">{content.label}</p><h2>{content.name}</h2><p className="support-agent-description">{content.description}</p><ul className="support-capabilities">{content.capabilities.map(capability => <li key={capability}><Check size={14} aria-hidden="true" />{capability}</li>)}</ul><div className="support-agent-run-info"><span><Clock3 size={14} aria-hidden="true" />{agent.lastRunAt ? formatDate(agent.lastRunAt, locale, true) : t('No runs yet', 'لا توجد عمليات بعد')}</span><span>{agent.runs} {t('runs', 'عمليات')}</span></div>{!agent.active && <p className="support-paused-note" role="status">{content.pause}</p>}<div className="support-agent-actions">{agent.id === 'writer' ? <Button variant="outline" asChild><Link href={reviewCampaign ? `/campaigns/${reviewCampaign.id}/review` : '/campaigns?new=true'}>{t('Open workspace', 'فتح مساحة العمل')}<ArrowUpRight size={15} aria-hidden="true" /></Link></Button> : <Button variant="outline" onClick={() => run(agent.id)} disabled={!agent.active}>{agent.id === 'researcher' ? <Search size={15} aria-hidden="true" /> : <Radio size={15} aria-hidden="true" />}{agent.id === 'researcher' ? t('Run sample research', 'تشغيل نموذج البحث') : t('Scan sample coverage', 'مسح التغطية النموذجية')}</Button>}<Button variant="ghost" size="icon" aria-label={agent.active ? t(`Pause ${content.name}`, `إيقاف ${content.name}`) : t(`Resume ${content.name}`, `استئناف ${content.name}`)} title={agent.active ? t('Pause agent', 'إيقاف الوكيل') : t('Resume agent', 'استئناف الوكيل')} onClick={() => { dispatch({ type: 'toggle-agent', id: agent.id }); notify(agent.active ? t(`${content.name} paused.`, `تم إيقاف ${content.name}.`) : t(`${content.name} resumed.`, `تم استئناف ${content.name}.`)); }}>{agent.active ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}</Button></div></article>;
+    })}</div>
+    {!agents.length && <div className="panel"><EmptyState icon={Bot} title={t('No agents match this view', 'لا يوجد وكلاء مطابقون')} description={t('Switch the filter to see your whole team.', 'غيّر عامل التصفية لعرض فريقك بالكامل.')}><Button variant="outline" onClick={() => setFilter('all')}>{t('Show all agents', 'عرض كل الوكلاء')}</Button></EmptyState></div>}
+    {researchShown && <section className="panel support-result-panel" aria-labelledby="research-results-title"><div className="panel-header"><div><h2 className="section-title" id="research-results-title">{t('A starting point for your media list', 'نقطة بداية لقائمتك الإعلامية')}</h2><p className="small muted">{t('Deterministic sample · All outlets below are fictional.', 'نموذج ثابت · جميع الجهات أدناه خيالية.')}</p></div><FileSearch size={19} aria-hidden="true" /></div><div className="support-research-results">{[{ name: 'The Cedar Review', category: t('Regional business', 'الأعمال الإقليمية'), note: t('A fictional regional business desk covering emerging products and thoughtful local entrepreneurship.', 'قسم أعمال إقليمي خيالي يغطي المنتجات الناشئة وريادة الأعمال المحلية.') }, { name: 'Tomorrow Journal', category: t('Technology & design', 'التقنية والتصميم'), note: t('A fictional editorial team interested in practical technology and the people behind it.', 'فريق تحرير خيالي يهتم بالتقنية العملية والأشخاص الذين يقفون وراءها.') }, { name: 'Wadi Dispatch', category: t('Community & culture', 'المجتمع والثقافة'), note: t('A fictional community publication focused on ideas that make everyday life easier.', 'منصة مجتمعية خيالية تركز على الأفكار التي تجعل الحياة اليومية أسهل.') }].map(outlet => <article key={outlet.name}><Globe2 size={20} aria-hidden="true" /><div><h3><bdi>{outlet.name}</bdi></h3><span className="support-research-category">{outlet.category}</span><p>{outlet.note}</p></div></article>)}</div></section>}
+    {coverageShown && <section className="panel support-result-panel" aria-labelledby="scan-result-title"><div className="panel-header"><div><h2 className="section-title" id="scan-result-title">{t('Sample coverage scan complete', 'اكتمل مسح التغطية النموذجية')}</h2><p className="small muted">{t('This scan summarizes the existing fictional dataset. It does not search the web.', 'يلخّص هذا المسح مجموعة البيانات الخيالية الحالية. لا يبحث على الويب.')}</p></div><Radio size={19} aria-hidden="true" /></div><div className="support-scan-summary"><div><strong>{state.coverage.length}</strong><span>{t('Sample articles', 'مقالات نموذجية')}</span></div><div><strong>{state.coverage.filter(item => item.sentiment === 'positive').length}</strong><span>{t('Positive', 'إيجابية')}</span></div><div><strong>{state.coverage.filter(item => item.sentiment === 'neutral').length}</strong><span>{t('Neutral', 'محايدة')}</span></div><Button asChild variant="outline"><Link href="/coverage">{t('Explore coverage', 'استكشاف التغطية')}<ArrowUpRight size={15} aria-hidden="true" /></Link></Button></div></section>}
+    <div className="support-agent-principle"><span className="support-agent-principle-icon"><Bot size={22} aria-hidden="true" /></span><div><h2>{t('The helpful part is simulated. The control is real.', 'المساعدة بالمحاكاة. والتحكم حقيقي.')}</h2><p>{t('Your agents use fixed sample content. They never contact journalists, publish stories, or send your data anywhere.', 'يستخدم وكلاؤك محتوى نموذجيًا ثابتًا. لا يتواصلون مع الصحفيين ولا ينشرون قصصًا ولا يرسلون بياناتك إلى أي جهة.')}</p></div></div>
+  </>;
+}

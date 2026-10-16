@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.yarn/
+*.tsbuildinfo
+.env*
+!.env.example
+.DS_Store
+playwright-report/
+test-results/
+.playwright-cli/
+output/playwright/*.log
