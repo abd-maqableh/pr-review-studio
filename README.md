@@ -19,6 +19,7 @@ Open [localhost:3000](http://localhost:3000). The app opens directly into the se
 ```sh
 yarn typecheck
 yarn test
+yarn test:e2e # with yarn dev running in another terminal
 yarn build
 yarn start
 ```
@@ -82,7 +83,18 @@ Manual browser verification should include:
 5. Switch English/Arabic, including mixed-language content, and use the mobile menu with a keyboard.
 6. Reload saved work, exercise reset, and inspect the storage-unavailable warning when browser storage is blocked.
 
-Check results and any browser screenshots are reported in the implementation handoff; the commands above are instructions, not a claim that they have passed.
+Verified locally on 16 October 2026 with Node 22 and installed Google Chrome:
+
+- `yarn typecheck` — passed.
+- `yarn test` — 8 domain/service tests passed. Node prints an expected experimental MockTimers warning.
+- `yarn test:e2e` — 6 isolated browser tests passed. The suite uses installed Chrome and an existing local server; set `BASE_URL` to test another local preview.
+- `yarn build` — production build passed, including Next.js type checking and route generation.
+- Additional browser checks passed for change-request feedback, comments and activity, coverage search/detail/empty states, and a filtered CSV download.
+- React Doctor scanned all files: 71/100, six advisories. Two flag control-flow complexity in the campaign/review components; three flag index keys in fixed-order paragraphs/options and immutable version snapshots (these lists cannot be reordered); one flags intentional post-hydration storage restoration. These were reviewed rather than suppressed. No claim of an exhaustive accessibility audit is made.
+
+Portfolio screenshots: [desktop review](output/playwright/pr-review-studio-desktop.png), [overview](output/playwright/overview.png), [mobile](output/playwright/pr-review-studio-mobile.png), and [Arabic mobile](output/playwright/pr-review-studio-arabic-mobile.png). The automated browser suite is in `tests/smoke.spec.ts`.
+
+The sandbox initially blocked dependency DNS and local compiler/browser processes. Authorized local network/process execution resolved those restrictions. Yarn’s TypeScript 7 compatibility-patch failure was resolved by pinning TypeScript 6.0.2. No external repository was created and nothing was deployed.
 
 ## Deploy to Vercel when ready
 
@@ -94,3 +106,7 @@ No repository or deployment is created by this project setup. For a later manual
 4. Deploy, then repeat the review and mobile/RTL smoke checks on the preview URL before promoting it.
 
 Each deployment origin has its own browser storage. The deployed app remains a local-data simulation with no backend services.
+
+## Implementation references
+
+The setup follows the official [Next.js installation documentation](https://nextjs.org/docs/app/getting-started/installation), [shadcn/ui React 19 and Tailwind 4 guidance](https://ui.shadcn.com/docs/tailwind-v4), and [React Hook Form resolver documentation](https://github.com/react-hook-form/resolvers).

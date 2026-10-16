@@ -55,7 +55,7 @@ export function Campaigns() {
   }
 
   return <>
-    <PageHeading eyebrow={t('YOUR WORKSPACE', 'مساحة عملك')} title={t('Campaigns', 'الحملات')} description={t('Every story, from the first brief to the final approval.', 'كل قصة، من الموجز الأول إلى الموافقة النهائية.')}>
+    <PageHeading eyebrow={t('Your workspace', 'مساحة عملك')} title={t('Campaigns', 'الحملات')} description={t('Every story, from the first brief to the final approval.', 'كل قصة، من الموجز الأول إلى الموافقة النهائية.')}>
       <Button ref={primaryCreateTrigger} onClick={openCreate}><Plus size={16} aria-hidden="true" />{t('New campaign', 'حملة جديدة')}</Button>
     </PageHeading>
 
@@ -63,7 +63,7 @@ export function Campaigns() {
       <div className="support-filter-bar">
         <div className="search-field support-search"><Search size={17} aria-hidden="true" /><input aria-label={t('Search campaigns', 'البحث في الحملات')} placeholder={t('Search campaigns…', 'ابحث عن حملة…')} value={query} onChange={event => setQuery(event.target.value)} /></div>
         <label className="support-filter-label"><span className="sr-only">{t('Campaign status', 'حالة الحملة')}</span><select className="select" value={status} onChange={event => setStatus(event.target.value)}>
-          <option value="all">{t('All statuses', 'كل الحالات')}</option><option value="pending">{t('Awaiting approval', 'بانتظار الموافقة')}</option><option value="draft">{t('Draft', 'مسودة')}</option><option value="in-review">{t('In review', 'قيد المراجعة')}</option><option value="approved">{t('Approved', 'معتمد')}</option><option value="changes-requested">{t('Changes requested', 'تعديلات مطلوبة')}</option>
+          <option value="all">{t('All statuses', 'كل الحالات')}</option><option value="pending">{t('Not yet approved', 'لم تُعتمد بعد')}</option><option value="draft">{t('Draft', 'مسودة')}</option><option value="in-review">{t('In review', 'قيد المراجعة')}</option><option value="approved">{t('Approved', 'معتمد')}</option><option value="changes-requested">{t('Changes requested', 'تعديلات مطلوبة')}</option>
         </select></label>
       </div>
       {filtered.length ? <div className="table-wrap"><table className="data-table support-campaign-table">

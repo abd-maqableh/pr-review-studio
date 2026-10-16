@@ -13,6 +13,7 @@ export function Overview() {
   const locale = state.locale;
   const t = (en: string, ar: string) => locale === 'ar' ? ar : en;
   const pending = state.campaigns.filter(campaign => campaign.status !== 'approved');
+  const awaiting = state.campaigns.filter(campaign => campaign.status === 'in-review');
   const approved = state.campaigns.filter(campaign => campaign.status === 'approved');
   const activeAgents = state.agents.filter(agent => agent.active);
   const recent = [...state.campaigns].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 4);
@@ -20,7 +21,7 @@ export function Overview() {
   const activities = state.campaigns.flatMap(campaign => campaign.activity.map(activity => ({ ...activity, campaignName: campaign.name, campaignId: campaign.id }))).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 4);
   const metrics = [
     { label: t('Total campaigns', 'إجمالي الحملات'), value: state.campaigns.length, icon: FolderOpen, href: '/campaigns', detail: t('Stories in your workspace', 'القصص في مساحة عملك') },
-    { label: t('Awaiting approval', 'بانتظار الموافقة'), value: pending.length, icon: Clock3, href: '/campaigns?status=pending', detail: t('Ready for a human perspective', 'بانتظار الرؤية البشرية') },
+    { label: t('Awaiting approval', 'بانتظار الموافقة'), value: awaiting.length, icon: Clock3, href: '/campaigns?status=in-review', detail: t('Ready for a human perspective', 'بانتظار الرؤية البشرية') },
     { label: t('Approved documents', 'المستندات المعتمدة'), value: approved.length, icon: CheckCheck, href: '/campaigns?status=approved', detail: t('Reviewed with confidence', 'مراجعة ومُعتمدة بثقة') },
     { label: t('Active agents', 'الوكلاء النشطون'), value: activeAgents.length, icon: Bot, href: '/agents?status=active', detail: t('Simulated assistants on hand', 'مساعدون بالمحاكاة جاهزون') },
   ];
@@ -28,7 +29,7 @@ export function Overview() {
   const activityLabels: Record<string, string> = { create: 'أُنشئت الحملة مع مسودة أولية', save: 'حُفظ إصدار جديد من المسودة', review: 'أُرسل المستند للمراجعة', approve: 'اعتُمد المستند لهذا العرض', changes: 'طُلبت تعديلات مع ملاحظات للمراجعة', comment: 'أُضيف تعليق للمراجعة', invalidate: 'أُلغيت الموافقة السابقة بسبب التعديلات' };
 
   return <>
-    <PageHeading eyebrow={t('A LITTLE CLARITY. A BETTER STORY.', 'رؤية أوضح. وقصة أفضل.')} title={t('Your newsroom, in focus.', 'غرفة أخبارك، بوضوح.')} description={t('A thoughtful workspace for the stories you’re ready to tell.', 'مساحة عمل مدروسة للقصص التي تستعد لروايتها.')}>
+    <PageHeading eyebrow={t('A little clarity. A better story.', 'رؤية أوضح. وقصة أفضل.')} title={t('Your newsroom, in focus.', 'غرفة أخبارك، بوضوح.')} description={t('A thoughtful workspace for the stories you’re ready to tell.', 'مساحة عمل مدروسة للقصص التي تستعد لروايتها.')}>
       <Button asChild><Link href="/campaigns?new=true"><Plus size={16} aria-hidden="true" />{t('New campaign', 'حملة جديدة')}</Link></Button>
     </PageHeading>
 
@@ -36,8 +37,8 @@ export function Overview() {
 
     <div className="support-overview-grid">
       <section className="support-focus-panel" aria-labelledby="focus-title">
-        <div className="support-focus-kicker"><span className="support-live-dot" /><span>{t('IN THE EDITOR’S CHAIR', 'على مكتب المحرّر')}</span></div>
-        {nextCampaign ? <><div className="support-focus-content"><div><h2 id="focus-title">{t('A fresh perspective makes all the difference.', 'رؤية جديدة تصنع الفارق.')}</h2><p>{t('Your next story is waiting for a thoughtful review. Fine-tune the details and make it yours.', 'قصتك التالية بانتظار مراجعة متأنية. اضبط التفاصيل وأضف رؤيتك.')}</p><Button asChild className="support-lime-button"><Link href={`/campaigns/${nextCampaign.id}/review`}>{t('Continue reviewing', 'متابعة المراجعة')}<ArrowRight size={16} aria-hidden="true" /></Link></Button></div><div className="support-mini-document"><div className="support-mini-document-meta"><FileText size={16} aria-hidden="true" /><span>{t('PRESS RELEASE', 'بيان صحفي')}</span><span className="support-mini-dot" /></div><h3 dir="auto">{nextCampaign.content.title}</h3><p dir="auto">{nextCampaign.content.paragraphs[0]}</p><div className="support-mini-document-footer"><span>{t('Your review matters', 'مراجعتك تُحدث فرقًا')}</span><Sparkles size={14} aria-hidden="true" /></div></div></div></> : <><h2 id="focus-title">{t('Everything is up to date.', 'كل شيء مُحدَّث.')}</h2><p>{t('Your stories have been reviewed. Start a new campaign when inspiration strikes.', 'تمت مراجعة قصصك. ابدأ حملة جديدة عندما تحضر الفكرة.')}</p><Button asChild className="support-lime-button"><Link href="/campaigns?new=true">{t('Create a campaign', 'إنشاء حملة')}<Plus size={16} aria-hidden="true" /></Link></Button></>}
+        <div className="support-focus-kicker"><span className="support-live-dot" /><span>{t('In the editor’s chair', 'على مكتب المحرّر')}</span></div>
+        {nextCampaign ? <><div className="support-focus-content"><div><h2 id="focus-title">{t('A fresh perspective makes all the difference.', 'رؤية جديدة تصنع الفارق.')}</h2><p>{t('Your next story is waiting for a thoughtful review. Fine-tune the details and make it yours.', 'قصتك التالية بانتظار مراجعة متأنية. اضبط التفاصيل وأضف رؤيتك.')}</p><Button asChild className="support-lime-button"><Link href={`/campaigns/${nextCampaign.id}/review`}>{t('Continue reviewing', 'متابعة المراجعة')}<ArrowRight size={16} aria-hidden="true" /></Link></Button></div><div className="support-mini-document"><div className="support-mini-document-meta"><FileText size={16} aria-hidden="true" /><span>{t('Press release', 'بيان صحفي')}</span><span className="support-mini-dot" /></div><h3 dir="auto">{nextCampaign.content.title}</h3><p dir="auto">{nextCampaign.content.paragraphs[0]}</p><div className="support-mini-document-footer"><span>{t('Your review matters', 'مراجعتك تُحدث فرقًا')}</span><Sparkles size={14} aria-hidden="true" /></div></div></div></> : <><h2 id="focus-title">{t('Everything is up to date.', 'كل شيء مُحدَّث.')}</h2><p>{t('Your stories have been reviewed. Start a new campaign when inspiration strikes.', 'تمت مراجعة قصصك. ابدأ حملة جديدة عندما تحضر الفكرة.')}</p><Button asChild className="support-lime-button"><Link href="/campaigns?new=true">{t('Create a campaign', 'إنشاء حملة')}<Plus size={16} aria-hidden="true" /></Link></Button></>}
       </section>
       <section className="panel support-agent-summary" aria-labelledby="agent-summary-title"><div className="panel-header"><div><h2 id="agent-summary-title" className="section-title">{t('Your small, mighty team', 'فريقك الصغير، أثره كبير')}</h2><p className="small muted">{t('Simulated agents. Human direction.', 'وكلاء بالمحاكاة. توجيه بشري.')}</p></div><Bot size={19} aria-hidden="true" /></div><div className="support-agent-mini-list">{state.agents.map(agent => <div className="support-agent-mini" key={agent.id}><span className={`support-agent-dot ${agent.active ? 'is-active' : ''}`} /><span>{agentNames[agent.id]}</span><span className="small muted">{agent.active ? t('Active', 'نشط') : t('Paused', 'متوقف')}</span></div>)}</div><Link className="support-inline-link" href="/agents">{t('Meet your agents', 'تعرّف على وكلائك')}<ArrowRight size={15} aria-hidden="true" /></Link></section>
     </div>

@@ -306,3 +306,7 @@ svg { flex-shrink: 0; }
 .sidebar .studio-note button, .mobile-sidebar .studio-note button { color: #d8ee9b; }
 .sidebar .sidebar-reset, .mobile-sidebar .sidebar-reset { color: #bfcec2; }
 @media (max-width: 480px) { .paragraph-button, .paragraph-input { font-size: 13px; }.save-indicator { font-size: 9px; }.document-tabs .tabs-list { gap: 13px; }.document-footer { font-size: 9px; } }
+.metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.metric-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 23px 21px 18px; }
+@media (max-width: 1100px) { .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } }
+@media (max-width: 480px) { .metric-card { padding: 18px 14px; }.support-metric-top { font-size: 11px; }.support-metric-bottom { line-height: 1.6; }.support-metric-bottom svg { display: none; } }
